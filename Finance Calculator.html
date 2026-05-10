@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Finance Calculator</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            background-color: #f9fafb;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            background-color: #eef2ff;
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        /* Form Styling */
+        .calculator-content {
+            padding: 30px;
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 10px 10px 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-calculate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Results Area */
+        .results {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .result-row.total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('general')">General Finance</button>
+        <button class="tab-btn" onclick="switchTab('mortgage')">Mortgage</button>
+        <button class="tab-btn" onclick="switchTab('auto')">Auto Loan</button>
+    </div>
+
+    <!-- 1. General Finance Calculator -->
+    <div id="general-panel" class="calculator-content form-section active">
+        <h2>Compound Interest</h2>
+        <div class="input-group">
+            <label>Initial Principal ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="g-principal" value="1000" oninput="updateGLabel('g-principal')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Monthly Contribution ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="g-contribution" value="100" oninput="updateGLabel('g-contribution')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Interest Rate (%)</label>
+            <div class="input-wrapper">
+                <span>%</span>
+                <input type="number" id="g-rate" value="5" oninput="updateGLabel('g-rate')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Time (Years)</label>
+            <div class="input-wrapper">
+                <span>Y</span>
+                <input type="number" id="g-years" value="10" oninput="updateGLabel('g-years')">
+            </div>
+        </div>
+
+        <button class="btn-calculate" onclick="calculateGeneral()">Calculate</button>
+
+        <div class="results">
+            <div class="result-row"><span>Total Contributions:</span> <span id="g-total-contrib"></span></div>
+            <div class="result-row"><span>Total Interest:</span> <span id="g-total-interest"></span></div>
+            <div class="result-row total"><span>Future Value:</span> <span id="g-future-value"></span></div>
+        </div>
+    </div>
+
+    <!-- 2. Mortgage Loan Calculator -->
+    <div id="mortgage-panel" class="calculator-content form-section">
+        <h2>Mortgage Calculator</h2>
+        <div class="input-group">
+            <label>Home Price ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="m-price" value="300000" oninput="updateMLabel('m-price')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Down Payment ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="m-down" value="60000" oninput="updateMLabel('m-down')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Interest Rate (%)</label>
+            <div class="input-wrapper">
+                <span>%</span>
+                <input type="number" id="m-rate" value="6.5" step="0.1" oninput="updateMLabel('m-rate')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Loan Term (Years)</label>
+            <div class="input-wrapper">
+                <span>Y</span>
+                <input type="number" id="m-years" value="30" oninput="updateMLabel('m-years')">
+            </div>
+        </div>
+        <!-- Extra Mortgage Fields -->
+        <div class="input-group">
+            <label>Property Tax (Yearly $)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="m-tax" value="3600" oninput="updateMLabel('m-tax')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Home Insurance (Yearly $)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="m-insurance" value="1200" oninput="updateMLabel('m-insurance')">
+            </div>
+        </div>
+
+        <button class="btn-calculate" onclick="calculateMortgage()">Calculate</button>
+
+        <div class="results">
+            <div class="result-row"><span>Principal & Interest:</span> <span id="m-pi"></span></div>
+            <div class="result-row"><span>Tax & Insurance:</span> <span id="m-extra"></span></div>
+            <div class="result-row total"><span>Monthly Payment:</span> <span id="m-total"></span></div>
+        </div>
+    </div>
+
+    <!-- 3. Auto Loan Calculator -->
+    <div id="auto-panel" class="calculator-content form-section">
+        <h2>Auto Loan Calculator</h2>
+        <div class="input-group">
+            <label>Vehicle Price ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="a-price" value="25000" oninput="updateALabel('a-price')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Down Payment ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="a-down" value="2000" oninput="updateALabel('a-down')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Trade-in Value ($)</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="a-trade" value="0" oninput="updateALabel('a-trade')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Interest Rate (%)</label>
+            <div class="input-wrapper">
+                <span>%</span>
+                <input type="number" id="a-rate" value="5" oninput="updateALabel('a-rate')">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>Loan Term (Months)</label>
+            <div class="input-wrapper">
+                <span>M</span>
+                <input type="number" id="a-months" value="60" oninput="updateALabel('a-months')">
+            </div>
+        </div>
+
+        <button class="btn-calculate" onclick="calculateAuto()">Calculate</button>
+
+        <div class="results">
+            <div class="result-row"><span>Loan Amount:</span> <span id="a-loan-amount"></span></div>
+            <div class="result-row"><span>Total Interest:</span> <span id="a-interest"></span></div>
+            <div class="result-row total"><span>Monthly Payment:</span> <span id="a-total"></span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Formatting Helper ---
+    const currencyFormat = (num) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    };
+
+    // --- Tab Switching Logic ---
+    function switchTab(mode) {
+        // Remove active class from buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        // Add active class to clicked button
+        event.target.classList.add('active');
+
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
+        // Show selected section
+        document.getElementById(`${mode}-panel`).classList.add('active');
+    }
+
+    // --- Helper for Input Label Updates ---
+    function updateGLabel(id) {
+        // Just updates the visual label if we added text, keeping it simple here
+    }
+    function updateMLabel(id) {
+        // Just updates the visual label
+    }
+    function updateALabel(id) {
+        // Just updates the visual label
+    }
+
+    // --- 1. General Finance Logic ---
+    function calculateGeneral() {
+        const principal = parseFloat(document.getElementById('g-principal').value) || 0;
+        const monthlyContrib = parseFloat(document.getElementById('g-contribution').value) || 0;
+        const ratePercent = parseFloat(document.getElementById('g-rate').value) || 0;
+        const years = parseFloat(document.getElementById('g-years').value) || 0;
+
+        const rateMonthly = ratePercent / 100 / 12;
+        const totalMonths = years * 12;
+
+        // Future Value of Principal
+        let fvPrincipal = principal * Math.pow((1 + rateMonthly), totalMonths);
+
+        // Future Value of Monthly Contributions
+        let fvContributions = 0;
+        if (rateMonthly > 0) {
+            fvContributions = monthlyContrib * ((Math.pow((1 + rateMonthly), totalMonths) - 1) / rateMonthly);
+        } else {
+            fvContributions = monthlyContrib * totalMonths;
+        }
+
+        let totalContributions = principal + (monthlyContrib * totalMonths);
+        let totalInterest = (fvPrincipal + fvContributions) - totalContributions;
+
+        document.getElementById('g-total-contrib').textContent = currencyFormat(totalContributions);
+        document.getElementById('g-total-interest').textContent = currencyFormat(totalInterest);
+        document.getElementById('g-future-value').textContent = currencyFormat(fvPrincipal + fvContributions);
+    }
+
+    // --- 2. Mortgage Logic ---
+    function calculateMortgage() {
+        const price = parseFloat(document.getElementById('m-price').value) || 0;
+        const down = parseFloat(document.getElementById('m-down').value) || 0;
+        const ratePercent = parseFloat(document.getElementById('m-rate').value) || 0;
+        const years = parseFloat(document.getElementById('m-years').value) || 0;
+        const taxYearly = parseFloat(document.getElementById('m-tax').value) || 0;
+        const insYearly = parseFloat(document.getElementById('m-insurance').value) || 0;
+
+        const loanAmount = price - down;
+        const rateMonthly = ratePercent / 100 / 12;
+        const totalMonths = years * 12;
+
+        // Standard Amortization Formula: M = P [ i(1 + i)^n ] / [ (1 + i)^n – 1]
+        let pAndIMonthly = 0;
+        if (rateMonthly > 0) {
+            pAndIMonthly = loanAmount * (rateMonthly * Math.pow(1 + rateMonthly, totalMonths)) / (Math.pow(1 + rateMonthly, totalMonths) - 1);
+        } else {
+            pAndIMonthly = loanAmount / totalMonths;
+        }
+
+        const monthlyTax = taxYearly / 12;
+        const monthlyIns = insYearly / 12;
+        const totalMonthly = pAndIMonthly + monthlyTax + monthlyIns;
+
+        document.getElementById('m-pi').textContent = currencyFormat(pAndIMonthly);
+        document.getElementById('m-extra').textContent = currencyFormat(monthlyTax + monthlyIns);
+        document.getElementById('m-total').textContent = currencyFormat(totalMonthly);
+    }
+
+    // --- 3. Auto Loan Logic ---
+    function calculateAuto() {
+        const price = parseFloat(document.getElementById('a-price').value) || 0;
+        const down = parseFloat(document.getElementById('a-down').value) || 0;
+        const trade = parseFloat(document.getElementById('a-trade').value) || 0;
+        const ratePercent = parseFloat(document.getElementById('a-rate').value) || 0;
+        const months = parseFloat(document.getElementById('a-months').value) || 0;
+
+        const loanAmount = price - down - trade;
+        const rateMonthly = ratePercent / 100 / 12;
+
+        let monthlyPayment = 0;
+        if (rateMonthly > 0) {
+            monthlyPayment = loanAmount * (rateMonthly * Math.pow(1 + rateMonthly, months)) / (Math.pow(1 + rateMonthly, months) - 1);
+        } else {
+            monthlyPayment = loanAmount / months;
+        }
+
+        const totalPayment = monthlyPayment * months;
+        const totalInterest = totalPayment - loanAmount;
+
+        document.getElementById('a-loan-amount').textContent = currencyFormat(loanAmount);
+        document.getElementById('a-interest').textContent = currencyFormat(totalInterest);
+        document.getElementById('a-total').textContent = currencyFormat(monthlyPayment);
+    }
+
+    // --- Keyboard Support ---
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            // Find active calculator and trigger its calculate function
+            const activeSection = document.querySelector('.form-section.active');
+            if (activeSection.id === 'general-panel') {
+                calculateGeneral();
+            } else if (activeSection.id === 'mortgage-panel') {
+                calculateMortgage();
+            } else if (activeSection.id === 'auto-panel') {
+                calculateAuto();
+            }
+        }
+    });
+
+    // Calculate defaults on load
+    window.onload = function() {
+        calculateGeneral();
+        calculateMortgage();
+        calculateAuto();
+    };
+
+</script>
+
+</body>
+</html>
